@@ -8,7 +8,7 @@ def index():
     heading = "Did he get the"
     para = "This is my Webpage"
 
-    return render_template("index.html", heading=heading, para=para)
+    return render_template("layout.html", heading=heading, para=para)
 
 
 
