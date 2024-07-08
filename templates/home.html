@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block main %}
+
+<div class="container my-3 p-2">
+    <!-- Wallet Information Card -->
+    <div class="card text-dark bg-dark mb-3 shadow-lg p-3 mb-5 bg-body rounded">
+        <div class="card-body">
+            <h2 class="card-title">TRAN$PAY WALLET</h2>
+            <p class="card-text display-4">₦1,250.00</p>
+            <p class="card-text">Account Number: 1234567890</p>
+            <a href="#" class="btn btn-link text-dark">Transaction History ></a>
+        </div>
+        <div class="d-grid p-3">
+            <button class="btn btn-primary btn-lg">+ Fund Account</button>
+        </div>
+    </div>
+
+    <div class="d-flex flex-row justify-content-evenly p-4 shadow p-3 mb-5 bg-body rounded">
+        <a href="airtime" class="text-decoration-none">
+            <div class="p-3 text-center circular-div">
+                <i class="bi bi-phone" style="font-size: 2rem;"></i>
+                <p>Airtime</p>
+            </div>
+        </a>
+        <a href="/data" class="text-decoration-none">
+            <div class="p-3 text-center circular-div">
+               <i class="bi bi-wifi" style="font-size: 2rem;"></i>
+               <p>Data</p>
+            </div>
+        </a>
+       
+    </div>
+</div>
+
+{% endblock %}
