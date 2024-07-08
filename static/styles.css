@@ -2,9 +2,6 @@
     margin-top: -10px;
 }
 
-.hero-bg {
-    background-image: url("/static/hero-picture.jpg");
-    background-position: center;
-    background-size: cover;
-    height: 50%;
+.center-it {
+    padding: 10px auto;
 }
