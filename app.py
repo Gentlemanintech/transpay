@@ -1,5 +1,4 @@
-from flask import Flask, flash, render_template, request
-
+from flask import Flask, flash, render_template, request, session
 
 app = Flask(__name__)
 
