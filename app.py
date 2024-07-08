@@ -1,14 +1,21 @@
-from flask import Flask, flash, render_template, request
+from flask import Flask, flash, render_template, request, session
 
 
 app = Flask(__name__)
 
 @app.route("/")
 def index():
-    heading = "Did he get the"
-    para = "This is my Webpage"
-    return render_template("login.html", heading=heading, para=para)
+    return render_template("index.html")
 
+
+@app.route("/register")
+def register():
+    return render_template("register.html")
+
+
+@app.route("/login")
+def login():
+    return render_template("login.html")
 
 
 if __name__ == "__main__":
