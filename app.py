@@ -7,7 +7,7 @@ app = Flask(__name__)
 def index():
     heading = "Did he get the"
     para = "This is my Webpage"
-    return render_template("index.html", heading=heading, para=para)
+    return render_template("login.html", heading=heading, para=para)
 
 
 

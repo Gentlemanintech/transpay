@@ -1,0 +1,87 @@
+{% extends "layout.html" %}
+
+
+{% block main %}
+
+    <div class="container p-4 shadow-lg p-3 mb-5 bg-body rounded">
+        <h4>Welcome to TRAN$PAY</h4>
+        <p>Fill the information below to create a new account</p>
+        <form>
+            <div class="row">
+            <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
+            <div class="form-check mt-2">
+                <label for="firstName" class="form-label">First Name*</label>
+                <input placeholder="Enter First Name" id="firstName" type="text" class="form-control" name="firstName">
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
+            <div class="form-check mt-2">
+                <label for="lastName" class="form-label">Last Name*</label>
+                <input placeholder="Enter Last Name" id="lastName" type="text" class="form-control" name="lastName">
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
+            <div class="form-check mt-2">
+                <label for="phoneNumber" class="form-label">Phone Number*</label>
+                <div class="input-group">
+                    <span class="input-group-text" id="basic-addon1">+234</span>
+                    <label for="phoneNumber" class="form-label"></label>
+                    <input placeholder="Enter Phone Number" id="phoneNumber" type="text" class="form-control" name="phoneNumber">
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
+            <div class="form-check mt-2">
+                <label for="dateOfBirth" class="form-label">Gender*</label>
+                    <div class="gender_wrp">
+                        <div class="form-check form-check-inline">
+                            <input name="gender" type="radio" id="Male" class="form-check-input" value="Male" checked="">
+                            <label title="" for="Male" class="form-check-label">Male</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input name="gender" type="radio" id="Female" class="form-check-input" value="Female">
+                            <label title="" for="Female" class="form-check-label">Female</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+<div class="row">
+    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
+        <div class="form-check mt-2">
+            <label for="email" class="form-label">Email*</label>
+            <input placeholder="Enter Email" type="email" id="email" class="form-control" name="email">
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
+            <div class="form-check mt-2">
+                <label for="password" class="form-label">Password*</label>
+                <input placeholder="Enter Password" type="password" id="password" class="form-control" name="password">
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
+            <div class="form-check mt-2">
+                <label for="confirmPassword" class="form-label">Confirm Password*</label>
+                <input placeholder="Confirm Password" type="password" id="confirmPassword" class="form-control" name="confirmPassword">
+            </div>
+        </div>
+        <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12">
+            <div class="checkboxs_flex mt-3">
+                <div class="label_text_check">
+                    <div class="checkboxtext-wrp">
+                        <span>By proceeding with the registration, I confirm that I have read and accept the <a href="/" target="_blank"> Privacy Policy</a> and <a href="/" target="_blank">Terms of Service </a></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <button class="btn btn-primary text-white w-100 py-$10 sign_btn" type="submit">Sign Up</button>
+        </div>
+    </div>
+</form>
+</div>
+
+ 
+{% endblock %}
