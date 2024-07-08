@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, flash, render_template, request
 
 
 app = Flask(__name__)
@@ -7,7 +7,6 @@ app = Flask(__name__)
 def index():
     heading = "Did he get the"
     para = "This is my Webpage"
-
     return render_template("index.html", heading=heading, para=para)
 
 
