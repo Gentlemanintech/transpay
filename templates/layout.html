@@ -26,20 +26,21 @@
 
         <nav class="bg-light border navbar navbar-expand-md navbar-light">
             <div class="container-fluid">
-                <a class="navbar-brand" href="/"><span class="blue">TRAN</span><span class="red">$</span><span class="yellow">PAY</span></span></a>
+                <a class="navbar-brand" href="/"><span class="blue">TRAN</span><span class="red">$</span><span class="yellow">PAY</span> {% block nav %} {% endblock %}</span></a>
                 <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-bs-target="#navbar" data-bs-toggle="collapse" type="button">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbar">
                     {% if session["user_id"] %}
                         <ul class="navbar-nav me-auto mt-2">
+                            
                             <li class="nav-item"><a class="nav-link" href="/quote">Quote</a></li>
                             <li class="nav-item"><a class="nav-link" href="/buy">Buy</a></li>
                             <li class="nav-item"><a class="nav-link" href="/sell">Sell</a></li>
                             <li class="nav-item"><a class="nav-link" href="/history">History</a></li>
                         </ul>
                         <ul class="navbar-nav ms-auto mt-2">
-                            <li class="nav-item border border-danger"><a class="nav-link" href="/addMoney">Wallet</a></li>
+                            <li class="nav-item p-2 border border-danger"><a class="nav-link" href="/addMoney">Wallet</a></li>
                             <li class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
                         </ul>
                     {% else %}
@@ -55,9 +56,10 @@
 
         {% if get_flashed_messages() %}
             <header>
-                <div class="alert alert-primary mb-0 text-center" role="alert">
+                <div class="alert alert-warning alert-dismissible fade show text-center" id="alertBox" role="alert">
                     {{ get_flashed_messages() | join(" ") }}
-                </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
             </header>
         {% endif %}
 
@@ -102,6 +104,7 @@
                 </div>
               </div>
         </footer>
+        <script src="/static/script.js"></script>
     </body>
 
 </html>

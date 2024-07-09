@@ -2,8 +2,7 @@ from flask import Flask, flash, render_template, request, session, redirect
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from cs50 import SQL
-from helper import login_required
-
+from helper import login_required, is_valid_email, is_valid_phone, is_strong_password, generate_account_number
 app = Flask(__name__)
 
 # Configure session to use filesystem (instead of signed cookies)
@@ -25,6 +24,7 @@ def after_request(response):
 
 @app.route("/")
 def index():
+    session.clear()
     return render_template("index.html")
 
 @app.route("/home")
@@ -46,21 +46,41 @@ def register():
         password = request.form.get("password")
         passwordConfirmation = request.form.get("confirmPassword")
 
-        if passwordConfirmation != password:
-            return "Password do not match"
+        # Validation checks
+        if not firstname or not lastname:
+            flash('First name and last name are required', 'error')
+            return render_template("register.html")
+        elif not is_valid_phone(phoneNumber):
+            flash('Phone number is invalid. It should be in the format 123-456-7890', 'error')
+            return render_template("register.html")
+        elif gender not in ['Male', 'Female', 'Other']:
+            flash('Gender must be Male, Female, or Other', 'error')
+            return render_template("register.html")
+        elif not is_valid_email(email):
+            flash('Email is invalid', 'error')
+            return render_template("register.html")
+        elif not is_strong_password(password):
+            flash('Password is not strong enough. It must be at least 8 characters long, contain both uppercase and lowercase letters, and at least one number', 'error')
+            return render_template("register.html")
+        elif password != passwordConfirmation:
+            flash('Passwords do not match', 'error')
+            return render_template("register.html")
 
+        # All validations passed, proceed with insertion
         name = firstname + " " + lastname
-        accountNumber = "1234567890"
-        amount = 10.00
+        # this code below generate a random 10 digits account number.
+        accountNumber = generate_account_number()
+        # Here the code will hash the password to save it in db instead of the password supplied by user.
         passwordHash = generate_password_hash(password)
 
         try:
-            db.execute("INSERT INTO users (name, password, email, phoneNumber, accountNumber, gender, amount) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                       name, passwordHash, email, phoneNumber, accountNumber, gender, amount)
-            return redirect("/login")
-        
+            db.execute("INSERT INTO users (name, pass, email, phoneNumber, accountNumber, gender) VALUES (?, ?, ?, ?, ?, ?)",
+                       name, passwordHash, email, phoneNumber, accountNumber, gender)
+            flash("Account created succesfully")
+            return redirect("/register")
         except ValueError:
-            return "Username already exist in our database. Go for a new one"
+            flash("Username already exists in our database. Choose a different one.", "error")
+            return render_template("register.html")
 
     return render_template("register.html")
 
@@ -74,27 +94,30 @@ def login():
 
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
-        # Ensure username was submitted
+        # Ensure email was submitted
         if not request.form.get("email"):
-            return "must provide username"
+            flash("must provide email", "error")
+            return render_template("login.html")
 
         # Ensure password was submitted
         elif not request.form.get("password"):
-            return "must provide password"
+            flash("must provide password", "error")
+            return render_template("login.html")
 
-        # Query database for username
+        # Query database for email
         rows = db.execute(
             "SELECT * FROM users WHERE email = ?", request.form.get("email")
         )
 
-        # Ensure username exists and password is correct
+        # Ensure email exists and password is correct
         if len(rows) != 1 or not check_password_hash(
-            rows[0]["password"], request.form.get("password")
+            rows[0]["pass"], request.form.get("password")
         ):
-            return "invalid username and/or password"
+            flash("invalid email or password", "error")
+            return render_template("login.html")
 
         # Remember which user has logged in
-        session["user_id"] = rows[0]["Id"]
+        session["user_id"] = rows[0]["id"]
 
         # Redirect user to home page
         return redirect("/home")
@@ -102,6 +125,17 @@ def login():
     # User reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("login.html")
+
+
+@app.route("/logout")
+def logout():
+    """Log user out"""
+
+    # Forget any user_id
+    session.clear()
+
+    # Redirect user to login form
+    return redirect("/")
 
 
 
