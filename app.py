@@ -2,8 +2,12 @@ from flask import Flask, flash, render_template, request, session, redirect
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from cs50 import SQL
-from helper import login_required, is_valid_email, is_valid_phone, is_strong_password, generate_account_number
+from helper import login_required, is_valid_email, is_valid_phone, is_strong_password, generate_account_number, naira
+
+
 app = Flask(__name__)
+
+app.jinja_env.filters["naira"] = naira
 
 # Configure session to use filesystem (instead of signed cookies)
 app.config["SESSION_PERMANENT"] = False
@@ -31,7 +35,8 @@ def index():
 @login_required
 def home():
     rows = db.execute("SELECT * FROM users WHERE Id = ?", session.get("user_id"))
-    return render_template("home.html", rows=rows)
+    pin = rows[0]['pin']
+    return render_template("home.html", rows=rows, pin=pin)
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -79,7 +84,7 @@ def register():
             flash("Account created succesfully")
             return redirect("/register")
         except ValueError:
-            flash("Username already exists in our database. Choose a different one.", "error")
+            flash("Email already exists. Choose a different one.", "error")
             return render_template("register.html")
 
     return render_template("register.html")
@@ -137,6 +142,23 @@ def logout():
     # Redirect user to login form
     return redirect("/")
 
+@app.route("/set-pin", methods=["POST"])
+def setPin():
+    user_id = session.get("user_id")
+    pin = request.form.get("pin")
+    confirmPin = request.form.get("confirmPin")
+
+    if not pin or not confirmPin:
+        flash("Fill both fields to set your PIN", "error")
+        return redirect('/home')
+
+    if len(pin) == 4 and pin == confirmPin:
+        db.execute("UPDATE users SET pin = ? WHERE id = ?", int(pin), user_id)
+        flash("Your pin has been set up successfully")
+    else:
+        flash("Your pin did not match", "error")
+
+    return redirect("/home")
 
 
 if __name__ == "__main__":

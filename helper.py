@@ -39,3 +39,8 @@ def generate_account_number():
     # Generate a 10-digit random number
     account_number = ''.join([str(random.randint(0, 9)) for _ in range(10)])
     return account_number
+
+
+def naira(value):
+    """Format value as Naira."""
+    return f"₦{value:,.2f}"

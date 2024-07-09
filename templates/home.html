@@ -2,7 +2,7 @@
 
 
 {% block nav %}
-<h4>Hello, {{rows[0].name}}</h4>
+<h5>Hello, {{rows[0].name}}</h5>
 {% endblock %}
 
 
@@ -13,8 +13,39 @@
     <div class="card text-dark bg-dark mb-3 shadow-lg p-3 mb-5 bg-body rounded">
         <div class="card-body">
             <h2 class="card-title">TRAN$PAY WALLET</h2>
-            <p class="card-text display-4">₦{{rows[0].amount}}</p>
+            <p class="card-text display-4">{{rows[0].amount | naira }}</p>
             <p class="card-text">Account Number: {{rows[0].accountNumber}}</p>
+            {% if pin == 0 %}
+            <a href="setPin" class="btn btn-link text-dark" data-bs-toggle="modal" data-bs-target="#pinModal">Set up your transaction pin</a>
+            <!--Modal codes when you clicked the set up transaction pin-->
+            <div class="modal fade" id="pinModal" tabindex="-1" aria-labelledby="pinModal" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Set up Transaction Pin</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/set-pin" method="post">
+                            <div class="form-check">
+                            <label for="email" class="form-label">Enter 4-digit PIN</label>
+                            <input autocomplete="off" placeholder="0000" type="text" id="pin" class="form-control text-center" name="pin" maxlength="4">
+                        </div>
+                        <div class="form-check">
+                            <label for="email" class="form-label">Enter 4-digit PIN</label>
+                            <input autocomplete="off" placeholder="0000" type="text" id="confirmPin" class="form-control text-center" name="confirmPin" maxlength="4">
+                        </div>
+                        <button type="submit" class="btn btn-primary text-white p-2 mt-3 sign_btn">Set up Pin</button>
+                    </form>
+                    </div>
+                    <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+                </div>
+            </div>
+            {% else %}
+            {% endif %}
             <a href="#" class="btn btn-link text-dark">Transaction History ></a>
         </div>
         <div class="d-grid p-3">
