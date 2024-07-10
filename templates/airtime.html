@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+
+{% block main %}
+
+<div class="container p-4 shadow-lg p-3 my-5 bg-body rounded">
+    <h4>Airtime</h4>
+    <hr>
+    <form action="/airtime" method="post">
+        <div class="form-check">
+        <label for="network" class="form-label">Select a Network</label>
+        <select class="form-select text-center" aria-label="Default select example" name="network" id="network">
+            <option selected disabled>Please select an option</option>
+            <option value="mtn">MTN</option>
+            <option value="airtel">AIRTEL</option>
+            <option value="glo">GLO</option>
+            <option value="9mobile">9MOBILE</option>
+          </select>
+    </div>
+    <div class="form-check">
+        <label for="airtimePhone" class="form-label">Phone Number</label>
+        <input autocomplete="off" placeholder="08036363636" type="text" id="airtimePhone" class="form-control text-center" name="phoneNumber">
+    </div>
+    <div class="form-check">
+        <label for="airtimeAmount" class="form-label">Amount</label>
+        <input autocomplete="off" type="text" id="airtimeAmount" class="form-control text-center" name="amount">
+    </div>
+    <button type="button" class="btn btn-primary text-white p-2 mt-3" disabled id="next" data-bs-toggle="modal" data-bs-target="#pinModal">Next</button>
+    <!--Modal for pin-->
+    <div class="modal fade" id="pinModal" tabindex="-1" aria-labelledby="pinModal" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Enter your Transaction Pin</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                    <div class="form-check">
+                    <label for="email" class="form-label">Enter your 4-digit PIN</label>
+                    <input autocomplete="off" placeholder="0000" type="text" id="pin" class="form-control text-center" name="pin" maxlength="4">
+                </div>
+                <button type="submit" class="btn btn-primary text-white p-2 mt-3">Buy Airtime</button>
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Back</button>
+            </div>
+        </div>
+        </div>
+    </div>
+<!--The div above is where the modal ends-->
+</form>
+</div>
+
+{% endblock %}

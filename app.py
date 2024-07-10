@@ -160,6 +160,16 @@ def setPin():
 
     return redirect("/home")
 
+@app.route("/airtime")
+def airtime():
+    return render_template("airtime.html")
+
+
+@app.route("/data")
+def data():
+    return render_template("data.html")
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
