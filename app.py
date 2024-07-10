@@ -161,12 +161,62 @@ def setPin():
 
     return redirect("/home")
 
-@app.route("/airtime")
+@app.route("/airtime", methods=["POST", "GET"])
 def airtime():
-    return render_template("airtime.html")
+    if request.method == "POST":
+        network = request.form.get("network")
+        phoneNumber = request.form.get("phoneNumber")
+        amount = request.form.get("airtimeAmount")
+        pin = request.form.get("pin")
+
+        if not network or not phoneNumber or not amount:
+            flash("Make sure you fill all the field")
+            return redirect("/airtime")
+        
+        if len(phoneNumber) != 11:
+            flash("Phone number should be 11-digit number")
+            return redirect("/airtime")
+        
+        if int(amount) < 50:
+            flash("Amount should not be less than 50NGN")
+            return redirect("/airtime")
+        
+        user_id = session.get("user_id")
+        # get the users pin and cash from db.
+        userPin = db.execute("SELECT pin, amount from users WHERE id = ?", user_id)
+        confirmPin = userPin[0]['pin']
+        usersCurrentCash = userPin[0]['amount']
+        action = 'Airtime'
+        date = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+
+        if not pin:
+            flash("Enter your pin")
+            return redirect("/airtime")
+        
+        if len(pin) != 4 or not int(pin):
+            flash("Your transaction pin are 4-digit numbers")
+            return redirect("/airtime")
+        #if the pin did not match the one in the database of the user it'll fail and return the flash message
+        if int(pin) != int(confirmPin):
+            flash("Your transaction pin is not correct")
+            return redirect("/airtime")
+
+        if int(amount) > int(usersCurrentCash):
+            flash("You do not have sufficient fund")
+            return redirect("/airtime")
+        
+        db.execute("UPDATE users SET amount = amount - ? WHERE id = ?", int(amount), user_id)
+        db.execute("INSERT INTO transactions (user_id, price, action, date) VALUES (?, ?, ?, ?)", user_id, int(amount), action, date)
+        flash("You have bought airtime successfully")
+        return redirect("/home")
+        
 
 
-@app.route("/data")
+    else:
+        return render_template("airtime.html")
+
+
+@app.route("/data", methods=["POST", "GET"])
 def data():
     return render_template("data.html")
 
