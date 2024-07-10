@@ -3,6 +3,7 @@ from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from cs50 import SQL
 from helper import login_required, is_valid_email, is_valid_phone, is_strong_password, generate_account_number, naira
+from datetime import datetime
 
 
 app = Flask(__name__)
@@ -168,6 +169,59 @@ def airtime():
 @app.route("/data")
 def data():
     return render_template("data.html")
+
+
+@app.route("/fund-account", methods=["POST", "GET"])
+def fundAccount():
+    if request.method == "POST":
+        amount = request.form.get("amount")
+        pin = request.form.get("pin")
+
+        # if user did not supply anything
+        if not amount:
+            flash("You did not specify the amount to add")
+            return redirect("/fund-account")
+        
+        # if user sets amount less than 10NGN it will return the flash message
+        if int(amount) < 10:
+            flash("Enter amount not less 10 NGN")
+            return redirect("/fund-account")
+        
+        user_id = session.get("user_id")
+        # get the users pin from db.
+        userPin = db.execute("SELECT pin from users WHERE id = ?", user_id)
+        confirmPin = userPin[0]['pin']
+        action = 'Fund account'
+        date = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+        
+        # if user did not supply pin it will flash the message
+        if not pin:
+            flash("Enter your pin")
+            return redirect("/fund-account")
+        
+        if len(pin) != 4 or not int(pin):
+            flash("Your transaction pin are 4-digit numbers")
+            return redirect("/fund-account")
+        #if the pin did not match the one in the database of the user it'll fail and return the flash message
+        if int(pin) != int(confirmPin):
+            flash("Your transaction pin is not correct")
+            return redirect("/fund-account")
+        
+        # if the pin matched then it will update the amount in the database and take you to homepage.
+        db.execute("UPDATE users SET amount = amount + ? WHERE id = ?", int(amount), user_id)
+        db.execute("INSERT INTO transactions (user_id, price, action, date) VALUES (?, ?, ?, ?)", user_id, int(amount), action, date)
+        flash(f"₦{amount} has been added to your wallet successfully!")
+        return redirect("/home")
+
+    else:
+        return render_template("fundAccount.html")
+    
+
+@app.route("/transaction-history")
+def transactionHistory():
+    user_id = session.get("user_id")
+    transactions = db.execute("SELECT * FROM transactions WHERE user_id = ?", user_id)
+    return render_template("transHistory.html", transactions=transactions)
 
 
 
