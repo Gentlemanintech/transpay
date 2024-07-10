@@ -134,6 +134,7 @@ def login():
 
 
 @app.route("/logout")
+@login_required
 def logout():
     """Log user out"""
 
@@ -144,6 +145,7 @@ def logout():
     return redirect("/")
 
 @app.route("/set-pin", methods=["POST"])
+@login_required
 def setPin():
     user_id = session.get("user_id")
     pin = request.form.get("pin")
@@ -162,6 +164,7 @@ def setPin():
     return redirect("/home")
 
 @app.route("/airtime", methods=["POST", "GET"])
+@login_required
 def airtime():
     if request.method == "POST":
         network = request.form.get("network")
@@ -217,11 +220,58 @@ def airtime():
 
 
 @app.route("/data", methods=["POST", "GET"])
+@login_required
 def data():
-    return render_template("data.html")
+    if request.method == "POST":
+        network = request.form.get("network")
+        dataPlanAmount = request.form.get("dataPlan")
+        phoneNumber = request.form.get("phoneNumber")
+        pin = request.form.get("pin")
+
+        if not network or not phoneNumber or not dataPlanAmount:
+            flash("Make sure you fill all the field")
+            return redirect("/data")
+        
+        if len(phoneNumber) != 11:
+            flash("Phone number should be 11-digit number")
+            return redirect("/data")
+
+        user_id = session.get("user_id")
+        # get the users pin and cash from db.
+        userPin = db.execute("SELECT pin, amount from users WHERE id = ?", user_id)
+        confirmPin = userPin[0]['pin']
+        usersCurrentCash = userPin[0]['amount']
+        action = 'Data'
+        date = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+
+        if not pin:
+            flash("Enter your pin")
+            return redirect("/data")
+        
+        if len(pin) != 4 or not int(pin):
+            flash("Your transaction pin are 4-digit numbers")
+            return redirect("/data")
+        #if the pin did not match the one in the database of the user it'll fail and return the flash message
+        if int(pin) != int(confirmPin):
+            flash("Your transaction pin is not correct")
+            return redirect("/data")
+
+        if int(dataPlanAmount) > int(usersCurrentCash):
+            flash("You do not have sufficient fund")
+            return redirect("/data")
+        
+        db.execute("UPDATE users SET amount = amount - ? WHERE id = ?", int(dataPlanAmount), user_id)
+        db.execute("INSERT INTO transactions (user_id, price, action, date) VALUES (?, ?, ?, ?)", user_id, int(dataPlanAmount), action, date)
+        flash("You have bought mobile data successfully")
+        return redirect("/home")
+
+    
+    else:
+        return render_template("data.html")
 
 
 @app.route("/fund-account", methods=["POST", "GET"])
+@login_required
 def fundAccount():
     if request.method == "POST":
         amount = request.form.get("amount")
@@ -268,9 +318,10 @@ def fundAccount():
     
 
 @app.route("/transaction-history")
+@login_required
 def transactionHistory():
     user_id = session.get("user_id")
-    transactions = db.execute("SELECT * FROM transactions WHERE user_id = ?", user_id)
+    transactions = db.execute("SELECT * FROM transactions WHERE user_id = ? ORDER BY date DESC", user_id)
     return render_template("transHistory.html", transactions=transactions)
 
 

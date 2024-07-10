@@ -2,7 +2,6 @@ let alertBox = document.querySelector('#alertBox');
 const form = document.getElementById('airtimeForm');
 const nextButton = document.getElementById('next');
 const networkSelect = document.getElementById('network');
-const dataSelect = document.getElementById('dataPlan');
 const phoneInput = document.getElementById('airtimePhone');
 const amountInput = document.getElementById('airtimeAmount');
 
@@ -23,3 +22,4 @@ function validateForm() {
 networkSelect.addEventListener('change', validateForm);
 phoneInput.addEventListener('input', validateForm);
 amountInput.addEventListener('input', validateForm);
+
