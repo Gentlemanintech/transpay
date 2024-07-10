@@ -5,6 +5,7 @@ const networkSelect = document.getElementById('network');
 const dataSelect = document.getElementById('dataPlan');
 const phoneInput = document.getElementById('airtimePhone');
 const amountInput = document.getElementById('airtimeAmount');
+
 // This set a timeout for every alert message that appears to dsappear after 6seconds.
 setTimeout(() => {
     alertBox.style.display = 'none';
