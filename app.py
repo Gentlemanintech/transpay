@@ -36,8 +36,9 @@ def index():
 @login_required
 def home():
     rows = db.execute("SELECT * FROM users WHERE Id = ?", session.get("user_id"))
+    routes = db.execute("SELECT * FROM rides")
     pin = rows[0]['pin']
-    return render_template("home.html", rows=rows, pin=pin)
+    return render_template("home.html", rows=rows, pin=pin, routes=routes)
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -323,6 +324,32 @@ def transactionHistory():
     user_id = session.get("user_id")
     transactions = db.execute("SELECT * FROM transactions WHERE user_id = ? ORDER BY date DESC", user_id)
     return render_template("transHistory.html", transactions=transactions)
+
+
+@app.route("/rides", methods=["POST", "GET"])
+@login_required
+def rides():
+    if request.method == "POST":
+        search = request.form.get("search")
+        if not search:
+            flash("Enter something in the search bar")
+            return redirect("/rides")
+        
+        searched = False
+        routes = db.execute("SELECT * FROM rides WHERE LOWER(fromLoc) LIKE ? or LOWER(toLoc) LIKE ?", '%'+search.lower()+'%', '%'+search.lower()+'%')
+        
+        if routes:
+            searched = True
+            return render_template("rides.html", routes=routes, searched=searched, search=search)
+        elif not routes:
+            flash("No such route available")
+            return redirect("/rides")
+        else:
+            return redirect("/rides")
+        
+    else:
+        routes = db.execute("SELECT * FROM rides")
+        return render_template("rides.html", routes=routes)
 
 
 

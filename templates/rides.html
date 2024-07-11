@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+
+{% block main %}
+
+<div class="container mt-4">
+     {% if searched %}
+        <h2>Routes from or to {{ search.capitalize() }}</h2>
+        <div>
+            <a href="/rides"><button class="btn btn-outline-secondary float-start mb-4">Show All Routes</button></a>
+        </div>
+    {% else %}
+        <h2>All Routes</h2>
+    {% endif %}
+    <!--the search bar codes -->
+    <form action="/rides" method="post">
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" placeholder="Search routes..." aria-label="Search routes" aria-describedby="button-search" name="search">
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="submit" id="button-search"><span class="bi bi-search"></span> Search</button>
+            </div>
+        </div>
+    </form>
+    
+    <div class="row">
+        {% for route in routes %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card">
+                <img src="/static/{% if route.name != 'Tricycle' %}hero.png {% else %}tricycle.png {% endif %}" class="card-img-top" alt="{{route.name}}">
+                <div class="card-body">
+                    <h5 class="card-title">{{route.name}} {{route.rideNumber}}</h5>
+                    <div class="d-flex flex-row justify-content-evenly">
+                        <p class="card-text text-start border-right"><span class="fw-bolder">From:</span> {{route.fromLoc}}</p>
+                        <p class="card-text text-end"><span class="fw-bolder">To:</span> {{route.toLoc}}</p>
+                    </div>
+                    <div class="d-flex flex-row justify-content-evenly flex-wrap mb-3">
+                        <p class="card-text">Departure Date: {{route.date}}</p>
+                        <p class="card-text">Departure Time: {{route.time}}</p>
+                    </div>
+                    <div class="d-flex flex-row justify-content-evenly">
+                        <p class="card-text text-start"><span class="fw-bolder">Seat Left:</span> {{route.seat}}</p>
+                        <p class="card-text text-end"><span class="fw-bolder">Tfare:</span> {{route.fare | naira}}/seat</p>
+                    </div>
+                    <a href="#" class="btn btn-primary">Book space</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        
+    </div>
+</div>
+
+
+{% endblock %}
