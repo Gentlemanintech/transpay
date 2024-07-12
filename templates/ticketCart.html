@@ -1,0 +1,43 @@
+    {% extends "layout.html" %}
+
+    {% block main %}
+    <div class="container my-3 d-flex justify-content-between align-items-center">
+        <a href="/home"><button class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back to Home</button></a>
+    </div>
+    <div class="container d-flex justify-content-center align-items-center">
+        <div class="text-center">
+            <h2 class="mb-3">Ticket Counter</h2>
+            <!-- Cart Item Cards -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-4">
+                            <h5 class="card-title">School Bus</h5>
+                            <p class="card-text"><span class="fw-bolder">From:</span> Al Qalam</p>
+                            <p class="card-text"><span class="fw-bolder">To:</span> Barhim Estate</p>
+                            <p class="card-text" id="ticketPrice"><span class="fw-bolder">Price:</span> ₦50.00</p>
+                        </div>
+                        <div class="col-md-4 mt-3">
+                            <label><span class="fw-bolder">Seat Qty</span></label>
+                            <div class="input-group">
+                                <input type="number" class="form-control text-center" id="cartCounter" value="1">
+                            </div>
+                        </div>
+                        <div class="col-md-4 mt-3">
+                            <button class="btn btn-danger btn-sm btn-block">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Summary Section -->
+            <div class="mt-4">
+                <h4>Summary</h4>
+                <p>Subtotal: ₦150.00</p>
+                <p>Tax (10%): ₦15.00</p>
+                <h5>Total: ₦165.00</h5>
+                <button class="btn btn-primary btn-block">Pay</button>
+            </div>
+        </div>
+    </div>
+    {% endblock %}

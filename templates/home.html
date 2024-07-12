@@ -97,7 +97,27 @@
                                 <p class="card-text text-start"><span class="fw-bolder">Seat Left:</span> {{route.seat}}</p>
                                 <p class="card-text text-end"><span class="fw-bolder">Tfare:</span> {{route.fare | naira}}/seat</p>
                             </div>
-                            <a href="#" class="btn btn-primary">Book space</a>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#seatQty">Book space</button>
+                        </div>
+                    </div>
+                    <!--Modal for selecting seat qty-->
+                    <div class="modal fade" id="seatQty" tabindex="-1" aria-labelledby="seatQty" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Number of Tickets?</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                    <div class="form-check">
+                                    <input autocomplete="off" placeholder="1" type="number" id="pin" class="form-control text-center" name="seatQty">
+                                </div>
+                                <button type="submit" class="btn btn-primary text-white p-2 mt-3">Proceed to Pay</button>
+                            </div>
+                            <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Back</button>
+                            </div>
+                        </div>
                         </div>
                     </div>
                     {% endfor %}

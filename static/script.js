@@ -23,3 +23,4 @@ networkSelect.addEventListener('change', validateForm);
 phoneInput.addEventListener('input', validateForm);
 amountInput.addEventListener('input', validateForm);
 
+

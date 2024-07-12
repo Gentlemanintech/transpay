@@ -350,6 +350,13 @@ def rides():
     else:
         routes = db.execute("SELECT * FROM rides")
         return render_template("rides.html", routes=routes)
+    
+
+@app.route("/ticket-bag")
+@login_required
+def ticketCart():
+    return render_template("ticketCart.html")
+
 
 
 
