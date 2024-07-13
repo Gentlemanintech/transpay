@@ -1,0 +1,64 @@
+{% extends "layout.html" %}
+
+{% block main %}
+<div class="container my-3 d-flex justify-content-between align-items-center">
+    <a href="/home" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i></a>
+</div>
+<div class="container mt-5">
+    {% if ticketDetails %}
+        {% for detail in ticketDetails %}
+        <div class="card my-3">
+            <div class="card-header">
+                <h1 class="card-title">TRAN$PAY TICKET</h1>
+                <p class="card-text">Travel Smart, Powered by Al Qalam.</p>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <h4>From</h4>
+                                <p>{{detail.fromLoc}}</p>
+                            </div>
+                            <div class="col-6">
+                                <h4>To</h4>
+                                <p>{{detail.toLoc}}</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <h4>Date&Time</h4>
+                                <p>{{detail.date}}</p>
+                            </div>
+                            <div class="col-6">
+                                <h4>Status</h4>
+                                <p>{{detail.status.upper()}}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-center">
+                        <h4>Seats</h4>
+                        <p>{{detail.seatQty}}</p>
+                        <h4>Passenger</h4>
+                        <p>{{detail.name}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <p>This ticket will close automatically after an hour of buying as it's a test mode. Thank you</p>
+            </div>
+            <div class="card-footer">
+                <div class="text-center">
+                    <img src="/static/barcode.png" alt="Barcode" width="150px" height="150px">
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            No open tickets found.
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

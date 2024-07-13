@@ -401,7 +401,7 @@ def ticketBuy():
 def ticketCart():
     userCart = session.get("cart", [])
     subtotal = sum(item['totalFare'] for item in userCart)
-    charges = 0.0 if len(userCart) == 0 else 4.0
+    charges = 0.0
     total = int(subtotal) + charges
     return render_template('ticketCart.html', userCart=userCart, subtotal=subtotal, charges=charges, total=total)
 
@@ -419,7 +419,65 @@ def cancelTicket():
                 session['cart'].remove(cart_item)
                 break
     
-    return redirect("/ticket-bag") 
+    return redirect("/home")
+
+
+@app.route("/pay-ticket", methods=["POST"])
+@login_required
+def payTicket():
+    pin = request.form.get("pin")
+    id = request.form.get("id")
+    status = 'Open'
+    action = 'Ticket'
+    user_id = session.get("user_id")
+    userDetails = db.execute("SELECT * FROM users WHERE id = ?", user_id)
+    usersCurrentCash = userDetails[0]['amount']
+    confirmPin = userDetails[0]['pin']
+    date = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+
+    if not pin:
+            flash("Enter your pin")
+            return redirect("/ticket-bag")
+    try:
+        if len(pin) != 4 or not int(pin):
+            flash("Your transaction pin are 4-digit numbers")
+            return redirect("/ticket-bag")
+    except ValueError:
+        flash("Your transaction pin should be 4-digit numbers")
+        return redirect("/ticket-bag")
+        #if the pin did not match the one in the database of the user it'll fail and return the flash message
+    if int(pin) != int(confirmPin):
+            flash("Your transaction pin is not correct")
+            return redirect("/ticket-bag")    
+
+    # Check if 'cart' exists in session and is not empty
+    if 'cart' in session and session['cart']:
+        for cart_item in session['cart']:
+            if cart_item['id'] == id:
+                if int(usersCurrentCash) >= int(cart_item['totalFare']):
+                    db.execute("INSERT INTO tickets (user_id, fromLoc, toLoc, status, seatQty) VALUES (?, ?, ?, ?, ?)", user_id, cart_item['from'], cart_item['to'], status, cart_item['seatQty'])
+                    db.execute("UPDATE users SET amount = amount - ? WHERE id = ?", int(cart_item['totalFare']), user_id)
+                    db.execute("INSERT INTO transactions (user_id, price, action, date) VALUES (?, ?, ?, ?)", user_id, int(cart_item['totalFare']), action, date)
+                    session['cart'].remove(cart_item)
+                    flash("Ticket bought successfully!")
+                    return redirect("/ticket-page")
+                else:
+                    flash("You do not have sufficient funds to buy this")
+                    return redirect("/ticket-bag")
+
+                
+    # If the cart item is not found, show an error message
+    flash("Ticket not found in cart.")
+    return redirect("/ticket-bag")
+
+
+@app.route("/ticket-page")
+@login_required
+def ticketPage():
+    ticketDetails = db.execute("SELECT users.name, tickets.fromLoc, tickets.toLoc, tickets.status, tickets.date, tickets.seatQty FROM users JOIN tickets ON tickets.user_id = users.id WHERE users.id = ? AND status = 'Open' ", session.get("user_id"))
+    return render_template("ticketPage.html", ticketDetails=ticketDetails)
+
+    
 
 
 
