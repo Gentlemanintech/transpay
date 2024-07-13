@@ -1,47 +1,57 @@
-    {% extends "layout.html" %}
+{% extends "layout.html" %}
 
-    {% block main %}
-    <div class="container my-3 d-flex justify-content-between align-items-center">
-        <a href="/home"><button class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back to Home</button></a>
-    </div>
-    <div class="container d-flex justify-content-center align-items-center">
-        <div class="text-center">
-            <h2 class="mb-3">Ticket Counter</h2>
-            <!-- Cart Item Cards -->
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">School Bus 1</h5>
-                    <div class="row align-items-center">
-                        <div class="col-md-4">
-                            <label><span class="fw-bolder">From</span></label>
-                            <p class="card-text">Al Qalam</p>
-                            <label><span class="fw-bolder">To</span></label>
-                            <p class="card-text">Barhim Estate</p>
-                        </div>
-                        <div class="col-md-4 mt-3">
-                            <label><span class="fw-bolder">Seat Qty</span></label>
-                            <p class="card-text">2</p>
-                            <p class="card-text" id="ticketPrice"><span class="fw-bolder">Price:</span> ₦50.00</p>
-                        </div>
-                        <div class="col-md-4 mt-3">
-                            <button class="btn btn-danger btn-sm btn-block">Cancel Ticket</button>
-                        </div>
+{% block main %}
+<div class="container my-3 d-flex justify-content-between align-items-center">
+    <a href="/home"><button class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back to Home</button></a>
+</div>
+<div class="container d-flex justify-content-center align-items-center">
+    <div class="text-center">
+        <h2 class="mb-3">Ticket Counter</h2>
+        <!-- Cart Item Cards -->
+        {% for cart in userCart %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">{{cart.rideName}} {{cart.rideNumber}}</h5>
+                <div class="row align-items-center">
+                    <div class="col-md-4">
+                        <label><span class="fw-bolder">From</span></label>
+                        <p class="card-text">{{cart.from}}</p>
+                        <label><span class="fw-bolder">To</span></label>
+                        <p class="card-text">{{cart.to}}</p>
                     </div>
-                    <div class="d-flex flex-row justify-content-center flex-wrap mt-2">
-                        <p class="card-text mx-2" id="ticketPrice"><span class="fw-bolder">Departure Date:</span> 15-07-2024</p>
-                        <p class="card-text mx-2" id="ticketPrice"><span class="fw-bolder">Departure Time:</span> 17:03:03</p>
+                    <div class="col-md-4 mt-3">
+                        <label><span class="fw-bolder">Seat Qty</span></label>
+                        <p class="card-text">{{cart.seatQty}}</p>
+                        <p class="card-text" id="ticketPrice"><span class="fw-bolder">Tfare:</span> {{cart.tfare | naira}}</p>
+                        <p class="card-text" id="ticketPrice"><span class="fw-bolder">Total:</span> {{cart.totalFare | naira}}</p>
+                    </div>
+                    <div class="col-md-4 mt-3">
+                        <form action="/cancel-ticket" method="post">
+                            <input type="hidden" name="id" value="{{ cart.id }}">
+                            <button class="btn btn-danger btn-sm btn-block">Cancel Ticket</button>
+                        </form>
                     </div>
                 </div>
-            </div>
-    
-            <!-- Summary Section -->
-            <div class="mt-4">
-                <h4>Summary</h4>
-                <p>Subtotal: ₦150.00</p>
-                <p>Tax (10%): ₦15.00</p>
-                <h5>Total: ₦165.00</h5>
-                <button class="btn btn-primary btn-block">Pay</button>
+                <div class="d-flex flex-row justify-content-center flex-wrap mt-2">
+                    <p class="card-text mx-2" id="ticketPrice"><span class="fw-bolder">Departure Date:</span> {{cart.date}}</p>
+                    <p class="card-text mx-2" id="ticketPrice"><span class="fw-bolder">Departure Time:</span> {{cart.time}}</p>
+                </div>
             </div>
         </div>
+        {% endfor %}
+        
+        {% if userCart is not defined or userCart|length == 0 %}
+        <p>No tickets in your cart.</p>
+        {% endif %}
+
+        <!-- Summary Section -->
+        <div class="mt-4">
+            <h4>Summary</h4>
+            <p>Subtotal: {{subtotal | naira}}</p>
+            <p>Charges: {{charges | naira}}</p>
+            <h5>Total: {{ total | naira }}</h5>
+            <button class="btn btn-primary btn-block">Pay</button>
+        </div>
     </div>
-    {% endblock %}
+</div>
+{% endblock %}

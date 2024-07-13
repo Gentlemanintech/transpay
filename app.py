@@ -352,10 +352,74 @@ def rides():
         return render_template("rides.html", routes=routes)
     
 
+@app.route("/ticket", methods=["POST"])
+@login_required
+def ticketBuy():
+    if "cart" not in session:
+        session["cart"] = []
+
+
+    id = request.form.get("id")
+    seatQty = request.form.get("seatQty")
+    rideDetails = db.execute("SELECT * FROM rides WHERE id = ?", id)
+    rideQty = rideDetails[0]['seat']
+    rideName = rideDetails[0]['name']
+    time = rideDetails[0]['time']
+    date = rideDetails[0]['date']
+    fromLoc = rideDetails[0]['fromLoc']
+    toLoc = rideDetails[0]['toLoc']
+    tfare = rideDetails[0]['fare']
+    totalFare = rideDetails[0]['fare'] * int(seatQty)
+    rideNumber = rideDetails[0]['rideNumber']
+    date = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+
+    if int(seatQty) > int(rideQty):
+        flash("They're not enough seats in the Ride.")
+        return redirect("/home")
+    
+    if not int(seatQty):
+        flash("You can only type in Numbers")
+        return redirect("/home")
+
+    session["cart"].append({
+        "id": date,
+        "rideName": rideName,
+        "rideNumber": rideNumber,
+        "time": time,
+        "date": date,
+        "from": fromLoc,
+        "to": toLoc,
+        "seatQty": seatQty,
+        "tfare": tfare,
+        "totalFare": totalFare
+    })
+    return redirect("/ticket-bag")
+
+
 @app.route("/ticket-bag")
 @login_required
 def ticketCart():
-    return render_template("ticketCart.html")
+    userCart = session.get("cart", [])
+    subtotal = sum(item['totalFare'] for item in userCart)
+    charges = 0.0 if len(userCart) == 0 else 4.0
+    total = int(subtotal) + charges
+    return render_template('ticketCart.html', userCart=userCart, subtotal=subtotal, charges=charges, total=total)
+
+
+@app.route("/cancel-ticket", methods=["POST"])
+@login_required
+def cancelTicket():
+    if 'cart' in session:
+        # Get index or identifier of the item to be removed (you'll typically pass this via POST request)
+        rideid = request.form.get('id')
+        
+        # Example of removing item by identifier (adjust based on how your data is structured)
+        for cart_item in session['cart']:
+            if cart_item['id'] == rideid:
+                session['cart'].remove(cart_item)
+                break
+    
+    return redirect("/ticket-bag") 
 
 
 
