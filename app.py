@@ -3,7 +3,7 @@ from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from cs50 import SQL
 from helper import login_required, is_valid_email, is_valid_phone, is_strong_password, generate_account_number, naira
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 app = Flask(__name__)
@@ -371,6 +371,7 @@ def ticketBuy():
     tfare = rideDetails[0]['fare']
     totalFare = rideDetails[0]['fare'] * int(seatQty)
     rideNumber = rideDetails[0]['rideNumber']
+    rideId = rideDetails[0]['id']
     date = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
 
     if int(seatQty) > int(rideQty):
@@ -391,7 +392,8 @@ def ticketBuy():
         "to": toLoc,
         "seatQty": seatQty,
         "tfare": tfare,
-        "totalFare": totalFare
+        "totalFare": totalFare,
+        "rideId": rideId
     })
     return redirect("/ticket-bag")
 
@@ -458,6 +460,7 @@ def payTicket():
                     db.execute("INSERT INTO tickets (user_id, fromLoc, toLoc, status, seatQty) VALUES (?, ?, ?, ?, ?)", user_id, cart_item['from'], cart_item['to'], status, cart_item['seatQty'])
                     db.execute("UPDATE users SET amount = amount - ? WHERE id = ?", int(cart_item['totalFare']), user_id)
                     db.execute("INSERT INTO transactions (user_id, price, action, date) VALUES (?, ?, ?, ?)", user_id, int(cart_item['totalFare']), action, date)
+                    db.execute("UPDATE rides SET seat = seat - ? WHERE id = ?", int(cart_item['seatQty']), cart_item['rideId'])
                     session['cart'].remove(cart_item)
                     flash("Ticket bought successfully!")
                     return redirect("/ticket-page")
@@ -477,9 +480,28 @@ def ticketPage():
     ticketDetails = db.execute("SELECT users.name, tickets.fromLoc, tickets.toLoc, tickets.status, tickets.date, tickets.seatQty FROM users JOIN tickets ON tickets.user_id = users.id WHERE users.id = ? AND status = 'Open' ", session.get("user_id"))
     return render_template("ticketPage.html", ticketDetails=ticketDetails)
 
+
+@app.route("/reset", methods=["POST"])
+@login_required
+def reset():
+    user_id = session.get("user_id")
+    date = datetime.now()
+    currDate = date.strftime("%m/%d/%Y")
+    currTime = date + timedelta(hours=1)
+    time = currTime.strftime("%H:%M:%S")
+
+    db.execute("UPDATE tickets SET status = 'Close' WHERE user_id = ?", user_id)
+    db.execute("UPDATE rides SET seat = 33, date = ?, time = ? WHERE id = 1", currDate, time)
+    db.execute("UPDATE rides SET seat = 3, date = ?, time = ? WHERE id = 2", date, time)
     
+    return redirect("/home")
 
-
+@app.route("/tickets-history")
+@login_required
+def ticketsHistory():
+    user_id = session.get("user_id")
+    tickets = db.execute("SELECT * FROM tickets WHERE user_id = ? ORDER BY date DESC", user_id)
+    return render_template("ticketTrans.html", tickets=tickets)
 
 
 if __name__ == "__main__":
