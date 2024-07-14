@@ -40,7 +40,7 @@ def generate_account_number():
     account_number = ''.join([str(random.randint(0, 9)) for _ in range(10)])
     return account_number
 
-
+# This code is sets the naira sign on html template and the .00 decimal instead of return more than 2place decimal
 def naira(value):
     """Format value as Naira."""
     return f"₦{value:,.2f}"

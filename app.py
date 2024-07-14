@@ -1,3 +1,4 @@
+import sqlite3
 from flask import Flask, flash, render_template, request, session, redirect
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -8,6 +9,7 @@ from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
+# This tells jinja template that you want this as a custom usage/template to use. {{total | naira}} this is how it's used in html template.
 app.jinja_env.filters["naira"] = naira
 
 # Configure session to use filesystem (instead of signed cookies)
@@ -17,6 +19,7 @@ Session(app)
 
 db = SQL("sqlite:///transpay.db")
 
+# this code here sets the browser on which the user visits not to save any cache so it gets latest version of the page.
 @app.after_request
 def after_request(response):
     """Ensure responses aren't cached"""
@@ -92,7 +95,7 @@ def register():
             db.execute("INSERT INTO users (name, pass, email, phoneNumber, accountNumber, gender) VALUES (?, ?, ?, ?, ?, ?)",
                        name, passwordHash, email, phoneNumber, accountNumber, gender)
             flash("Account created succesfully")
-            return redirect("/register")
+            return redirect("/login")
         # if your account already exist it will return a message telling you
         except ValueError:
             flash("Email already exists. Choose a different one.", "error")
@@ -149,12 +152,13 @@ def login():
 def logout():
     """Log user out"""
 
-    # Forget any user_id
+    # Forget any user_id. This will clear the session saved.
     session.clear()
 
-    # Redirect user to login form
+    # Redirect user to index page
     return redirect("/")
 
+# This route is the logic of user setting his pin
 @app.route("/set-pin", methods=["POST"])
 @login_required
 def setPin():
@@ -162,18 +166,23 @@ def setPin():
     pin = request.form.get("pin")
     confirmPin = request.form.get("confirmPin")
 
+   # if user didn't give data on any of this it will flash the message under
     if not pin or not confirmPin:
         flash("Fill both fields to set your PIN", "error")
         return redirect('/home')
 
+    # Checks if the pin is 4 digits and it is the same as confirmPin the user typed. and det the pin in users database
     if len(pin) == 4 and pin == confirmPin:
         db.execute("UPDATE users SET pin = ? WHERE id = ?", int(pin), user_id)
         flash("Your pin has been set up successfully")
+    # if it didn't match it will return a message that it's not matched
     else:
         flash("Your pin did not match", "error")
 
+    # if the pin was set successfully it will take you back to home.
     return redirect("/home")
 
+# This is a route where users buy airtime for their phone.
 @app.route("/airtime", methods=["POST", "GET"])
 @login_required
 def airtime():
@@ -186,11 +195,12 @@ def airtime():
         if not network or not phoneNumber or not amount:
             flash("Make sure you fill all the field")
             return redirect("/airtime")
-        
+        # if the number the user typed is not up to 11 digits, it will return the message in flash() and redirect user to that same page
         if len(phoneNumber) != 11:
             flash("Phone number should be 11-digit number")
             return redirect("/airtime")
         
+        # if the amount the user typed is less than 50NGN then it will return an error message
         if int(amount) < 50:
             flash("Amount should not be less than 50NGN")
             return redirect("/airtime")
@@ -219,17 +229,17 @@ def airtime():
             flash("You do not have sufficient fund")
             return redirect("/airtime")
         
+        # if checks passed then it will update the users current balance
         db.execute("UPDATE users SET amount = amount - ? WHERE id = ?", int(amount), user_id)
+        # And insert the transaction into the history db.
         db.execute("INSERT INTO transactions (user_id, price, action, date) VALUES (?, ?, ?, ?)", user_id, int(amount), action, date)
         flash("You have bought airtime successfully")
         return redirect("/home")
         
-
-
     else:
         return render_template("airtime.html")
 
-
+# The code here is similar to the airtime, it shares the same logic just that the amount of data plans is fixed here.
 @app.route("/data", methods=["POST", "GET"])
 @login_required
 def data():
@@ -280,7 +290,7 @@ def data():
     else:
         return render_template("data.html")
 
-
+# This code allows user to fund their account.
 @app.route("/fund-account", methods=["POST", "GET"])
 @login_required
 def fundAccount():
@@ -318,7 +328,7 @@ def fundAccount():
             flash("Your transaction pin is not correct")
             return redirect("/fund-account")
         
-        # if the pin matched then it will update the amount in the database and take you to homepage.
+        # if the pin matched then it will update the amount in the database and add your transaction to history and take you to homepage.
         db.execute("UPDATE users SET amount = amount + ? WHERE id = ?", int(amount), user_id)
         db.execute("INSERT INTO transactions (user_id, price, action, date) VALUES (?, ?, ?, ?)", user_id, int(amount), action, date)
         flash(f"₦{amount} has been added to your wallet successfully!")
@@ -327,7 +337,7 @@ def fundAccount():
     else:
         return render_template("fundAccount.html")
     
-
+# this code allows user to see all their transaction history, from adding money to account to buying a ticket you'll see the transactions all.
 @app.route("/transaction-history")
 @login_required
 def transactionHistory():
@@ -335,7 +345,7 @@ def transactionHistory():
     transactions = db.execute("SELECT * FROM transactions WHERE user_id = ? ORDER BY date DESC", user_id)
     return render_template("transHistory.html", transactions=transactions)
 
-
+# This code is where the logic of available routes are
 @app.route("/rides", methods=["POST", "GET"])
 @login_required
 def rides():
@@ -344,10 +354,12 @@ def rides():
         if not search:
             flash("Enter something in the search bar")
             return redirect("/rides")
-        
+        # here is a variable I initiate as the user did not search for anything, but will update it to True if user did.
         searched = False
+        # The query to get the rides with the stuff the user search for e.g al qalam.
         routes = db.execute("SELECT * FROM rides WHERE LOWER(fromLoc) LIKE ? or LOWER(toLoc) LIKE ?", '%'+search.lower()+'%', '%'+search.lower()+'%')
         
+        # Here if the user typed in a query to search, now you see I changed the variable searched to true because the user searched. 
         if routes:
             searched = True
             return render_template("rides.html", routes=routes, searched=searched, search=search)
@@ -361,7 +373,7 @@ def rides():
         routes = db.execute("SELECT * FROM rides")
         return render_template("rides.html", routes=routes)
     
-
+# This is when a user clicks on the book space and input the seat quatity.
 @app.route("/ticket", methods=["POST"])
 @login_required
 def ticketBuy():
@@ -383,7 +395,8 @@ def ticketBuy():
     rideNumber = rideDetails[0]['rideNumber']
     rideId = rideDetails[0]['id']
     date = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
-
+    
+    # If the user chose a seat quantity that is more than the seat in the ride, it will return that message in flash()
     if int(seatQty) > int(rideQty):
         flash("They're not enough seats in the Ride.")
         return redirect("/home")
@@ -392,6 +405,7 @@ def ticketBuy():
         flash("You can only type in Numbers")
         return redirect("/home")
 
+    # if all checks are passed then the ticket is added to cart i.e saved to session so you can retrieve it easily, then take you to ticket counter page.
     session["cart"].append({
         "id": date,
         "rideName": rideName,
@@ -407,7 +421,7 @@ def ticketBuy():
     })
     return redirect("/ticket-bag")
 
-
+# This is the route to ticket couter. More like a cart where the user make payment for the tickets
 @app.route("/ticket-bag")
 @login_required
 def ticketCart():
@@ -417,15 +431,15 @@ def ticketCart():
     total = int(subtotal) + charges
     return render_template('ticketCart.html', userCart=userCart, subtotal=subtotal, charges=charges, total=total)
 
-
+# This is for the cancel ticket button in the counter(cart). When a user clicks it the ticket is been taken off from the counter and return the user to homepage.
 @app.route("/cancel-ticket", methods=["POST"])
 @login_required
 def cancelTicket():
     if 'cart' in session:
-        # Get index or identifier of the item to be removed (you'll typically pass this via POST request)
+        # Get index or identifier of the item to be removed.
         rideid = request.form.get('id')
         
-        # Example of removing item by identifier (adjust based on how your data is structured)
+        # This removed item by identifier
         for cart_item in session['cart']:
             if cart_item['id'] == rideid:
                 session['cart'].remove(cart_item)
@@ -433,7 +447,7 @@ def cancelTicket():
     
     return redirect("/home")
 
-
+#This is when you clicked on the Next and pay button. This finalised your ticket.
 @app.route("/pay-ticket", methods=["POST"])
 @login_required
 def payTicket():
@@ -466,6 +480,7 @@ def payTicket():
     if 'cart' in session and session['cart']:
         for cart_item in session['cart']:
             if cart_item['id'] == id:
+                # This code checks the usersCurrent cash if it's more than the total fare and if yes it will buy the ticket
                 if int(usersCurrentCash) >= int(cart_item['totalFare']):
                     db.execute("INSERT INTO tickets (user_id, fromLoc, toLoc, status, seatQty) VALUES (?, ?, ?, ?, ?)", user_id, cart_item['from'], cart_item['to'], status, cart_item['seatQty'])
                     db.execute("UPDATE users SET amount = amount - ? WHERE id = ?", int(cart_item['totalFare']), user_id)
@@ -475,6 +490,7 @@ def payTicket():
                     flash("Ticket bought successfully!")
                     return redirect("/ticket-page")
                 else:
+                    # if user has no sufficient fund it will return this message
                     flash("You do not have sufficient funds to buy this")
                     return redirect("/ticket-bag")
 
@@ -483,14 +499,14 @@ def payTicket():
     flash("Ticket not found in cart.")
     return redirect("/ticket-bag")
 
-
+# This here is the route where the ticket bought is displayed so a user can be confirmed by drivers.
 @app.route("/ticket-page")
 @login_required
 def ticketPage():
     ticketDetails = db.execute("SELECT users.name, tickets.fromLoc, tickets.toLoc, tickets.status, tickets.date, tickets.seatQty FROM users JOIN tickets ON tickets.user_id = users.id WHERE users.id = ? AND status = 'Open' ", session.get("user_id"))
     return render_template("ticketPage.html", ticketDetails=ticketDetails)
 
-
+# This code here resets the seat of the rides to their initial seat number and set a date thats an hour ahead from current time. Also closes all the tickets that are opened
 @app.route("/reset", methods=["POST"])
 @login_required
 def reset():
@@ -506,14 +522,16 @@ def reset():
     
     return redirect("/home")
 
+# This is how users see all the ticket they bought
 @app.route("/tickets-history")
 @login_required
 def ticketsHistory():
     user_id = session.get("user_id")
+    # the ORDER BY DESC is setting the last transaction on top.
     tickets = db.execute("SELECT * FROM tickets WHERE user_id = ? ORDER BY date DESC", user_id)
     return render_template("ticketTrans.html", tickets=tickets)
 
-
+# This is the route to users profile.
 @app.route("/profile")
 @login_required
 def profile():
@@ -521,7 +539,7 @@ def profile():
     profile = db.execute("SELECT * FROM users WHERE id = ?", user_id)
     return render_template("profile.html", profile=profile)
 
-
+# There's a button in the profile for change pin. This here is the logic that makes it happen
 @app.route("/change-pin", methods=["POST"])
 @login_required
 def changePin():
@@ -555,13 +573,7 @@ def changePin():
     flash("You have updated your transaction pin successfully")
     return redirect("/profile")
 
-@app.route("/delete-account", methods=["POST"])
-@login_required
-def deleteAccount():
-    id = request.form.get("id")
-    db.execute("DELETE FROM users WHERE id = ?", id)
-    flash("You have succesfully deleted your account!")
-    return redirect("/")
+
 
 
 if __name__ == "__main__":

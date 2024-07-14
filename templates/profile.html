@@ -11,8 +11,8 @@
             <img src="https://via.placeholder.com/150" class="rounded-circle mb-3" alt="Profile Icon">
             <h5 class="card-title">{{profile[0]['name']}}</h5>
             <p class="card-text">{{profile[0]['email']}}</p>
-            <a href="#" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#changePin">Change Transaction Pin</a>
-            <a href="#" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmModal">Close Account</a>
+            <a class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#changePin">Change Transaction Pin</a>
+            <a href="/logout" class="btn btn-danger">Log out</a>
         </div>
     </div>
 </div>
@@ -48,31 +48,4 @@
     </div>
     </div>
 </div>
-<!--Modal for deleting account-->
-    <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <!-- Modal Header -->
-                <div class="modal-header">
-                    <h5 class="modal-title" id="confirmModal">Close your Account ?</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-
-                <!-- Modal Body -->
-                <div class="modal-body">
-                    This action cannot be undone. Are you sure you want to proceed?
-                </div>
-
-                <!-- Modal Footer with buttons -->
-                <div class="modal-footer">
-                    <form action="/delete-account" method="post">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <input type="hidden" name="id" value="{{ profile[0]['id']}}">
-                    <button type="submit" class="btn btn-danger">Yes</button> 
-                    </form>
-                    
-                </div>
-            </div>
-        </div>
-    </div>
 {% endblock %}
