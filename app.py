@@ -504,5 +504,55 @@ def ticketsHistory():
     return render_template("ticketTrans.html", tickets=tickets)
 
 
+@app.route("/profile")
+@login_required
+def profile():
+    user_id = session.get("user_id")
+    profile = db.execute("SELECT * FROM users WHERE id = ?", user_id)
+    return render_template("profile.html", profile=profile)
+
+
+@app.route("/change-pin", methods=["POST"])
+@login_required
+def changePin():
+    oldPin = request.form.get("oldPin")
+    newPin = request.form.get("newPin")
+    confirmPin = request.form.get("confirmPin")
+    data = db.execute("SELECT pin FROM users WHERE id = ?", session.get("user_id"))
+    userPin = data[0]['pin']
+
+    if not oldPin or not newPin or not confirmPin:
+        flash("Make sure you fill all the spaces")
+        return redirect("/profile")
+    
+    try:
+        if not int(oldPin) and not int(newPin) and not int(confirmPin):
+            flash("Should be numbers only")
+            return redirect('/profile')
+    except ValueError:
+        flash("You can only type 4 digit numbers")
+        return redirect('/profile')
+    
+    if int(newPin) != int(confirmPin):
+        flash("Your new pin is not matched")
+        return redirect("/profile")
+    
+    if int(oldPin) != int(userPin):
+        flash("Your old pin is not correct")
+        return redirect("/profile")
+    
+    db.execute("UPDATE users SET pin = ? WHERE id = ?", newPin, session.get("user_id"))
+    flash("You have updated your transaction pin successfully")
+    return redirect("/profile")
+
+@app.route("/delete-account", methods=["POST"])
+@login_required
+def deleteAccount():
+    id = request.form.get("id")
+    db.execute("DELETE FROM users WHERE id = ?", id)
+    flash("You have succesfully deleted your account!")
+    return redirect("/")
+
+
 if __name__ == "__main__":
     app.run(debug=True)

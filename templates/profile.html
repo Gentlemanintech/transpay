@@ -1,0 +1,78 @@
+{% extends "layout.html" %}
+
+{% block main %}
+<div class="container my-3 d-flex justify-content-between align-items-center">
+    <a href="/home"  class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i></a>
+  </div>
+  <h2 class="mx-auto">Profile</h2>
+<div class="container d-flex justify-content-center align-items-center">
+    <div class="card text-center" style="width: 18rem;">
+        <div class="card-body">
+            <img src="https://via.placeholder.com/150" class="rounded-circle mb-3" alt="Profile Icon">
+            <h5 class="card-title">{{profile[0]['name']}}</h5>
+            <p class="card-text">{{profile[0]['email']}}</p>
+            <a href="#" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#changePin">Change Transaction Pin</a>
+            <a href="#" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmModal">Close Account</a>
+        </div>
+    </div>
+</div>
+<!--Modal for changing transaction password-->
+<div class="modal fade" id="changePin" tabindex="-1" aria-labelledby="changePin" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+        <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Change your Transaction Pin</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form action="/change-pin" method="post">
+                <div class="form-check">
+                <p class="alert alert-primary" role="alert">Please do not update your pin to 0000 for security measures</p>
+                <label for="email" class="form-label">Enter your old 4-digit PIN</label>
+                <input autocomplete="off" placeholder="0000" type="text" class="form-control text-center" name="oldPin" maxlength="4">
+               </div>
+               <div class="form-check">
+                <label for="email" class="form-label">Enter your new 4-digit PIN</label>
+                <input autocomplete="off" placeholder="0000" type="text" class="form-control text-center" name="newPin" maxlength="4">
+               </div>
+               <div class="form-check">
+                <label for="email" class="form-label">Confirm your new 4-digit PIN</label>
+                <input autocomplete="off" placeholder="0000" type="text" class="form-control text-center" name="confirmPin" maxlength="4">
+               </div>
+            <button type="submit" class="btn btn-primary text-white p-2 mt-3">Change Pin</button>
+        </form>
+        </div>
+        <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Back</button>
+        </div>
+    </div>
+    </div>
+</div>
+<!--Modal for deleting account-->
+    <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmModal">Close your Account ?</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    This action cannot be undone. Are you sure you want to proceed?
+                </div>
+
+                <!-- Modal Footer with buttons -->
+                <div class="modal-footer">
+                    <form action="/delete-account" method="post">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <input type="hidden" name="id" value="{{ profile[0]['id']}}">
+                    <button type="submit" class="btn btn-danger">Yes</button> 
+                    </form>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
