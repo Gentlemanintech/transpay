@@ -26,25 +26,32 @@ def after_request(response):
     return response
 
 
-
+# this is the route for my index page
 @app.route("/")
 def index():
+    # I clear all session if there's any once index is been accessed and render the index page
     session.clear()
     return render_template("index.html")
 
+# This is a route to the home page after the user logged in successfully.
 @app.route("/home")
 @login_required
 def home():
+    # Here I checked if the user is registered. if yes then get his details and display it on the home page.
     rows = db.execute("SELECT * FROM users WHERE Id = ?", session.get("user_id"))
     routes = db.execute("SELECT * FROM rides")
+    # this line here gets me the current pin of the user.
     pin = rows[0]['pin']
+    # Here I render the home page plus I passed the user details and rides available to use in the page.
     return render_template("home.html", rows=rows, pin=pin, routes=routes)
 
-
+# This is my route to Registration page, where users can create their account.
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """Register user"""
+    # This code checks whether the user gets to the page on POST(sending a data to the server) e.g maybe submitting a form 
     if request.method == "POST":
+        # the codes get all the response a user typed on the page.
         firstname = request.form.get("firstName")
         lastname = request.form.get("lastName")
         phoneNumber = request.form.get("phoneNumber")
@@ -56,39 +63,42 @@ def register():
         # Validation checks
         if not firstname or not lastname:
             flash('First name and last name are required', 'error')
-            return render_template("register.html")
+            return redirect("/register")
         elif not is_valid_phone(phoneNumber):
             flash('Phone number is invalid. It should be in the format 123-456-7890', 'error')
-            return render_template("register.html")
+            return redirect("/register")
         elif gender not in ['Male', 'Female', 'Other']:
             flash('Gender must be Male, Female, or Other', 'error')
-            return render_template("register.html")
+            return redirect("/register")
         elif not is_valid_email(email):
             flash('Email is invalid', 'error')
-            return render_template("register.html")
+            return redirect("/register")
         elif not is_strong_password(password):
             flash('Password is not strong enough. It must be at least 8 characters long, contain both uppercase and lowercase letters, and at least one number', 'error')
-            return render_template("register.html")
+            return redirect("/register")
         elif password != passwordConfirmation:
             flash('Passwords do not match', 'error')
-            return render_template("register.html")
+            return redirect("/register")
 
-        # All validations passed, proceed with insertion
+        # All validations passed, proceed to concatenates the name so it can be stored as a single column in database.
         name = firstname + " " + lastname
         # this code below generate a random 10 digits account number.
         accountNumber = generate_account_number()
-        # Here the code will hash the password to save it in db instead of the password supplied by user.
+        # Here the code will hash the password to save it in db instead of the password supplied by user, even if there's access to the db, the password wont be known.
         passwordHash = generate_password_hash(password)
 
+        # Here your account is created if it passed the constraints check on db i.e no duplicate of email of phone number.
         try:
             db.execute("INSERT INTO users (name, pass, email, phoneNumber, accountNumber, gender) VALUES (?, ?, ?, ?, ?, ?)",
                        name, passwordHash, email, phoneNumber, accountNumber, gender)
             flash("Account created succesfully")
             return redirect("/register")
+        # if your account already exist it will return a message telling you
         except ValueError:
             flash("Email already exists. Choose a different one.", "error")
-            return render_template("register.html")
-
+            return redirect("/register")
+        
+    # this code here will return if it's not a post method. It will render the register page.
     return render_template("register.html")
 
 
@@ -96,7 +106,7 @@ def register():
 def login():
     """Log user in"""
 
-    # Forget any user_id
+    # Forget any user_id 
     session.clear()
 
     # User reached route via POST (as by submitting a form via POST)
@@ -111,22 +121,22 @@ def login():
             flash("must provide password", "error")
             return render_template("login.html")
 
-        # Query database for email
+        # Check database for details of the user if the email the user typed exist.
         rows = db.execute(
             "SELECT * FROM users WHERE email = ?", request.form.get("email")
         )
 
-        # Ensure email exists and password is correct
+        # checks if email exists and password is correct
         if len(rows) != 1 or not check_password_hash(
             rows[0]["pass"], request.form.get("password")
         ):
             flash("invalid email or password", "error")
             return render_template("login.html")
 
-        # Remember which user has logged in
+        # Remember which user has logged in i.e by storing the user_id in a session.
         session["user_id"] = rows[0]["id"]
 
-        # Redirect user to home page
+        # Redirect user to home page if logged in successfully
         return redirect("/home")
 
     # User reached route via GET (as by clicking a link or via redirect)
@@ -200,7 +210,7 @@ def airtime():
         if len(pin) != 4 or not int(pin):
             flash("Your transaction pin are 4-digit numbers")
             return redirect("/airtime")
-        #if the pin did not match the one in the database of the user it'll fail and return the flash message
+        # if the pin did not match the one in the database of the user it'll fail and return the flash message
         if int(pin) != int(confirmPin):
             flash("Your transaction pin is not correct")
             return redirect("/airtime")
