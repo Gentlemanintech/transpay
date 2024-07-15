@@ -24,6 +24,12 @@ Watch my video demo to see the Tran$pay Wallet App in action:
 
 Description: In this video demo, you'll see how to use Tran$pay Wallet App to perform various tasks such as booking a bus, purchasing airtime, viewing transaction history, funding your account, setting up a transaction PIN, purchasing tickets, and logging out securely. 
 
+## Security
+
+- **Password Security:** User passwords are securely hashed before being stored in the database. This means that passwords are converted into irreversible hashes using strong cryptographic algorithms. As a result, no one, including administrators, can view or retrieve plain-text passwords from the database.
+- **Database Security:** The app uses SQLite for database operations, ensuring data integrity and reliability. Access to sensitive user information is protected through secure coding practices and data encryption where applicable.
+
+
 ## Technologies Used
 
 - **Frontend:** HTML, CSS, JavaScript
