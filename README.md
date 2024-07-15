@@ -20,7 +20,7 @@ Tran$pay Wallet App is designed to facilitate cashless transactions within the u
 
 Watch my video demo to see the Tran$pay Wallet App in action:
 
-[![Tran$pay Wallet App Demo]](https://example.com/demo-video)
+[![Tran$pay Wallet App Demo Video]](https://example.com/demo-video)
 
 Description: In this video demo, you'll see how to use Tran$pay Wallet App to perform various tasks such as booking a bus, purchasing airtime, viewing transaction history, funding your account, setting up a transaction PIN, purchasing tickets, and logging out securely. 
 
