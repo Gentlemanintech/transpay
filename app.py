@@ -6,8 +6,8 @@ from cs50 import SQL
 from helper import login_required, is_valid_email, is_valid_phone, is_strong_password, generate_account_number, naira
 from datetime import datetime, timedelta
 
-
-app = Flask(__name__)
+# initializing the flask app
+app = Flask(__name__) 
 
 # This tells jinja template that you want this as a custom usage/template to use. {{total | naira}} this is how it's used in html template.
 app.jinja_env.filters["naira"] = naira
